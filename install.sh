@@ -6,7 +6,7 @@
 # It tries to determine the OS and architecture and downloads the appropriate binary.
 #
 # Usage:
-#   curl -sSf https://memory.nodimus.com/install.sh | sh
+#   curl -sSf https://raw.githubusercontent.com/wassmi/nodimus-memory/main/install.sh | sh
 #
 
 set -e

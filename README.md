@@ -30,13 +30,13 @@ Get Nodimus Memory up and running with a single command. The installer will dete
 **Linux/macOS:**
 
 ```bash
-curl -sSf https://memory.nodimus.com/install.sh | sh
+curl -sSf https://raw.githubusercontent.com/wassmi/nodimus-memory/main/install.sh | sh
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
-iwr https://memory.nodimus.com/install.ps1 -useb | iex
+iwr https://raw.githubusercontent.com/wassmi/nodimus-memory/main/install.ps1 -useb | iex
 ```
 
 After installation, you can add Nodimus Memory as an MCP server to your favorite LLM CLI. For example:
