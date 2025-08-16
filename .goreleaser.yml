@@ -10,7 +10,7 @@ before:
 
 builds:
   - id: nodimus-memory
-    main: ./cmd/nodimus-memory
+    main: cmd/nodimus-memory/main.go
     binary: nodimus-memory
     env:
       - CGO_ENABLED=0
