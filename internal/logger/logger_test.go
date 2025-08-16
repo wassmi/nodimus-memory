@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nodimus/nodimus/internal/config"
+	"github.com/wassmi/nodimus-memory/internal/config"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 

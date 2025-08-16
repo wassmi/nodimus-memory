@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	_ "github.com/nodimus/nodimus/internal/storage"
+	_ "github.com/wassmi/nodimus-memory/internal/storage"
 )
 
 // MockDB for snapshot tests

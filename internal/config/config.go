@@ -59,11 +59,11 @@ func Default() *Config {
 			Timeout: 30,
 		},
 		Storage: StorageConfig{
-			DataDir: "~/.nodimus",
+			DataDir: "~/.nodimus-memory",
 		},
 		Logger: LoggerConfig{
 			Level:      "info",
-			File:       "audit/nodimus.log",
+			File:       "audit/nodimus-memory.log",
 			MaxSize:    50, // megabytes
 			MaxBackups: 3,
 			MaxAge:     30, // days

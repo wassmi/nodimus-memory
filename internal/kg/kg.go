@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/nodimus/nodimus/internal/storage"
+	"github.com/wassmi/nodimus-memory/internal/storage"
 )
 
 // KGDB defines the database operations required by the kg package.

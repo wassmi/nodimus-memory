@@ -1,4 +1,4 @@
-module github.com/nodimus/nodimus
+module github.com/wassmi/nodimus-memory
 
 go 1.24.5
 

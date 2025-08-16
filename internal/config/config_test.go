@@ -16,7 +16,7 @@ bind = "127.0.0.1"
 timeout = 30
 
 [storage]
-data_dir = "/tmp/nodimus"
+data_dir = "/tmp/nodimus-memory"
 
 [logger]
 level = "debug"
@@ -62,8 +62,8 @@ func TestDefault(t *testing.T) {
 	if cfg.Server.Port != 4000 {
 		t.Errorf("Expected default server port 4000, got %d", cfg.Server.Port)
 	}
-	if cfg.Storage.DataDir != "~/.nodimus" {
-		t.Errorf("Expected default data dir ~/.nodimus, got %s", cfg.Storage.DataDir)
+	if cfg.Storage.DataDir != "~/.nodimus-memory" {
+		t.Errorf("Expected default data dir ~/.nodimus-memory, got %s", cfg.Storage.DataDir)
 	}
 }
 
@@ -76,19 +76,19 @@ func TestExpandDataDir(t *testing.T) {
 		t.Fatalf("ExpandDataDir failed: %v", err)
 	}
 	homeDir, _ := os.UserHomeDir()
-	expectedPath := filepath.Join(homeDir, ".nodimus")
+	expectedPath := filepath.Join(homeDir, ".nodimus-memory")
 	if expandedPath != expectedPath {
 		t.Errorf("Expected expanded path %s, got %s", expectedPath, expandedPath)
 	}
 
 	// Test with absolute path
-	cfg.Storage.DataDir = "/var/lib/nodimus"
+	cfg.Storage.DataDir = "/var/lib/nodimus-memory"
 	expandedPath, err = cfg.ExpandDataDir()
 	if err != nil {
 		t.Fatalf("ExpandDataDir failed: %v", err)
 	}
-	if expandedPath != "/var/lib/nodimus" {
-		t.Errorf("Expected expanded path /var/lib/nodimus, got %s", expandedPath)
+	if expandedPath != "/var/lib/nodimus-memory" {
+		t.Errorf("Expected expanded path /var/lib/nodimus-memory, got %s", expandedPath)
 	}
 
 	// Test with empty path

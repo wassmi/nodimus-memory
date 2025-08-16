@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/robfig/cron/v3"
-	"github.com/nodimus/nodimus/internal/storage"
+	"github.com/wassmi/nodimus-memory/internal/storage"
 )
 
 // SnapshotDB defines the database operations required by the snapshot package.

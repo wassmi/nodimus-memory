@@ -1,6 +1,6 @@
 package server
 
-import "github.com/nodimus/nodimus/internal/storage"
+import "github.com/wassmi/nodimus-memory/internal/storage"
 
 // DB defines the interface for database operations required by the server.
 type DB interface {

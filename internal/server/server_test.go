@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nodimus/nodimus/internal/storage"
+	"github.com/wassmi/nodimus-memory/internal/storage"
 )
 
 // MockDB implements the DB interface for testing.

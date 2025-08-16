@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/nodimus/nodimus/internal/storage"
+	"github.com/wassmi/nodimus-memory/internal/storage"
 )
 
 // MockDB implements the KGDB interface for testing.

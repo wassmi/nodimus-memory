@@ -18,7 +18,7 @@ nodimus-memory
 
 # Log files
 *.log
-audit/nodimus.log
+audit/nodimus-memory.log
 
 # OS-specific files
 .DS_Store

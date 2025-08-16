@@ -30,21 +30,21 @@ Get Nodimus Memory up and running with a single command. The installer will dete
 **Linux/macOS:**
 
 ```bash
-curl -sSf https://nodimus.com/install.sh | sh
+curl -sSf https://memory.nodimus.com/install.sh | sh
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
-iwr https://nodimus.com/install.ps1 -useb | iex
+iwr https://memory.nodimus.com/install.ps1 -useb | iex
 ```
 
 After installation, you can add Nodimus Memory as an MCP server to your favorite LLM CLI. For example:
 
 ```bash
 # For Claude CLI
-claude mcp add nodimus "$(cat ~/.nodimus/mcp.json)"
-where ~/.nodimus/mcp.json looks like:
+claude mcp add nodimus-memory "$(cat ~/.nodimus-memory/mcp.json)"
+where ~/.nodimus-memory/mcp.json looks like:
 
 ```json
 {
@@ -63,8 +63,33 @@ If it prints without error, the LLM CLI will be able to launch nodimus mcp over 
 (You can also hand-edit ~/.claude/mcp.json if you prefer.)
 
 # For Gemini CLI
-gemini mcp add nodimus "$(cat ~/.nodimus/mcp.json)"
+claude mcp add nodimus-memory "$(cat ~/.nodimus-memory/mcp.json)"
+where ~/.nodimus-memory/mcp.json looks like:
+
+```json
+{
+  "command": "~/.nodimus-memory/bin/nodimus-memory",
+  "args": ["mcp"]
+}
+```
 ~/.nodimus/mcp.json is the same JSON blob as above.
+
+#### Cursor
+Cursor reads the MCP list from its settings file, not via a CLI sub-command.
+Add the following stanza to ~/.cursor/settings.json (create the file if it doesn’t exist):
+
+Quick sanity check:
+
+```bash
+# Confirm the MCP descriptor is valid JSON
+jq . ~/.nodimus-memory/mcp.json
+```
+If it prints without error, the LLM CLI will be able to launch nodimus-memory mcp over STDIO.
+(You can also hand-edit ~/.claude/mcp.json if you prefer.)
+
+# For Gemini CLI
+gemini mcp add nodimus-memory "$(cat ~/.nodimus-memory/mcp.json)"
+~/.nodimus-memory/mcp.json is the same JSON blob as above.
 
 #### Cursor
 Cursor reads the MCP list from its settings file, not via a CLI sub-command.
@@ -74,12 +99,20 @@ Add the following stanza to ~/.cursor/settings.json (create the file if it doesn
 {
   "mcp_servers": {
     "nodimus_memory": {
-      "command": "~/.nodimus/bin/nodimus",
+      "command": "~/.nodimus-memory/bin/nodimus-memory",
       "args": ["mcp"]
     }
   }
 }
 ```
+
+Quick sanity check:
+
+```bash
+# Confirm the MCP descriptor is valid JSON
+jq . ~/.nodimus-memory/mcp.json
+```
+If it prints without error, the LLM CLI will be able to launch nodimus-memory mcp over STDIO.
 
 Quick sanity check:
 
@@ -101,11 +134,11 @@ bind = "127.0.0.1"
 timeout = 30
 
 [storage]
-data_dir = "~/.nodimus"
+data_dir = "~/.nodimus-memory"
 
 [logger]
 level = "info"
-file = "audit/nodimus.log"
+file = "audit/nodimus-memory.log"
 max_size = 50
 max_backups = 3
 max_age = 30
@@ -142,7 +175,7 @@ curl -X POST -H "Content-Type: application/json" \
 # Python example for an LLM agent to add memory
 import requests
 
-def add_memory_to_nodimus(content, entities):
+def add_memory_to_nodimus_memory(content, entities):
     url = "http://127.0.0.1:8080/rpc"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -162,7 +195,7 @@ def add_memory_to_nodimus(content, entities):
 llm_generated_content = "The Eiffel Tower is in Paris."
 llm_extracted_entities = ["Eiffel Tower", "Paris"]
 
-response = add_memory_to_nodimus(llm_generated_content, llm_extracted_entities)
+response = add_memory_to_nodimus_memory(llm_generated_content, llm_extracted_entities)
 print(f"Memory added with ID: {response['result']['id']}")
 ```
 
@@ -184,7 +217,7 @@ curl -X POST -H "Content-Type: application/json" \
 # Python example for an LLM agent to search memory
 import requests
 
-def search_memory_in_nodimus(query):
+def search_memory_in_nodimus_memory(query):
     url = "http://127.0.0.1:8080/rpc"
     headers = {"Content-Type": "application/json"}
     payload = {
@@ -201,7 +234,7 @@ def search_memory_in_nodimus(query):
 
 # LLM needs to retrieve information
 llm_query = "What is the capital of France?"
-search_results = search_memory_in_nodimus(llm_query)
+search_results = search_memory_in_nodimus_memory(llm_query)
 
 if search_results['result']['results']:
     print("Found memories:")
@@ -240,7 +273,7 @@ To integrate Nodimus Memory with Gemini CLI, you'll need to configure a custom t
   },
   "tools": [
     {
-      "name": "nodimus_add_memory",
+      "name": "nodimus_memory_add_memory",
       "description": "Adds a new memory to Nodimus Memory.",
       "mcp_server": "nodimus_memory",
       "method": "memory.AddMemory",
@@ -259,7 +292,7 @@ To integrate Nodimus Memory with Gemini CLI, you'll need to configure a custom t
       }
     },
     {
-      "name": "nodimus_search_memory",
+      "name": "nodimus_memory_search_memory",
       "description": "Searches for memories in Nodimus Memory.",
       "mcp_server": "nodimus_memory",
       "method": "memory.SearchMemory",
@@ -271,7 +304,7 @@ To integrate Nodimus Memory with Gemini CLI, you'll need to configure a custom t
       }
     },
     {
-      "name": "nodimus_get_context",
+      "name": "nodimus_memory_get_context",
       "description": "Retrieves the content of a specific memory by its ID from Nodimus Memory.",
       "mcp_server": "nodimus_memory",
       "method": "memory.GetContext",
@@ -289,8 +322,8 @@ To integrate Nodimus Memory with Gemini CLI, you'll need to configure a custom t
 Once configured, you can use these tools within Gemini CLI:
 
 ```
-/tool nodimus_add_memory content="The quick brown fox jumps over the lazy dog." entities=["fox", "dog"]
-/tool nodimus_search_memory query="brown fox"
+/tool nodimus_memory_add_memory content="The quick brown fox jumps over the lazy dog." entities=["fox", "dog"]
+/tool nodimus_memory_search_memory query="brown fox"
 ```
 
 #### Claude (Conceptual Integration)
@@ -305,7 +338,7 @@ import json
 
 NODIMUS_RPC_URL = "http://127.0.0.1:8080/rpc"
 
-def call_nodimus_rpc(method, params):
+def call_nodimus_memory_rpc(method, params):
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -324,7 +357,7 @@ def call_nodimus_rpc(method, params):
 def claude_add_memory(content, entities):
     """Function to be called by your Claude integration to add memory."""
     print(f"Claude is adding memory: {content} with entities {entities}")
-    result = call_nodimus_rpc("memory.AddMemory", {"content": content, "entities": entities})
+    result = call_nodimus_memory_rpc("memory.AddMemory", {"content": content, "entities": entities})
     if result:
         print(f"Memory added with ID: {result.get('id')}")
     return result
@@ -332,7 +365,7 @@ def claude_add_memory(content, entities):
 def claude_search_memory(query):
     """Function to be called by your Claude integration to search memory."""
     print(f"Claude is searching memory for query: {query}")
-    result = call_nodimus_rpc("memory.SearchMemory", {"query": query})
+    result = call_nodimus_memory_rpc("memory.SearchMemory", {"query": query})
     if result and result.get("results"):
         print("Found memories:")
         for memory in result["results"]:
@@ -377,7 +410,7 @@ If you wish to contribute or build from source:
 
 1.	**Clone the repository:**
 	```bash
-	git clone https://github.com/nodimus/nodimus-memory.git
+	git clone https://github.com/wassmi/nodimus-memory.git
 	cd nodimus-memory
 	```
 
@@ -395,7 +428,7 @@ go test ./...
 ### Building the Executable
 
 ```bash
-go build -o nodimus-memory ./cmd/nodimus
+go build -o nodimus-memory ./cmd/nodimus-memory
 ```
 
 ## Future Enhancements

@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/rpc/v2"
 	"github.com/gorilla/rpc/v2/json2"
-	"github.com/nodimus/nodimus/internal/kg"
+	"github.com/wassmi/nodimus-memory/internal/kg"
 )
 
 // Server is the JSON-RPC 2.0 server.

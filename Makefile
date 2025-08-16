@@ -12,7 +12,7 @@ clean:
 	rm -f $(BINARY_NAME)
 
 build:
-	go build -o $(BINARY_NAME) ./cmd/nodimus
+	go build -o $(BINARY_NAME) ./cmd/nodimus-memory
 
 release:
 	@echo "Creating new release..."

@@ -1,9 +1,9 @@
 # Requires PowerShell 5.1 or later
 
 $ProjectName = "nodimus-memory"
-$Repo = "nodimus/nodimus-memory" # Replace with your GitHub username/repo
-$InstallDir = Join-Path $HOME ".nodimus\bin"
-$McpConfigDir = Join-Path $HOME ".nodimus"
+$Repo = "wassmi/nodimus-memory" # Replace with your GitHub username/repo
+$InstallDir = Join-Path $HOME ".nodimus-memory\bin"
+$McpConfigDir = Join-Path $HOME ".nodimus-memory"
 $McpConfigFile = Join-Path $McpConfigDir "mcp.json"
 
 # --- Helper Functions ---
@@ -115,7 +115,7 @@ if (-not (Test-Path $McpConfigDir)) {
 
 $McpConfigContent = @{
     mcpServers = @{
-        nodimus = @{
+        nodimus-memory = @{
             command = Join-Path $InstallDir $BinaryName
             args = @("mcp")
         }
@@ -127,6 +127,6 @@ Write-Host "MCP configuration written to $McpConfigFile"
 
 Write-Host "Installation complete!"
 Write-Host "You can now add Nodimus Memory to your LLM CLI. For example:"
-Write-Host "claude mcp add nodimus ~/.nodimus/bin/nodimus mcp"
-Write-Host "gemini mcp add nodimus ~/.nodimus/bin/nodimus mcp"
-Write-Host "cursor mcp add nodimus ~/.nodimus/bin/nodimus mcp"
+Write-Host "claude mcp add nodimus-memory ~/.nodimus-memory/bin/nodimus-memory mcp"
+Write-Host "gemini mcp add nodimus-memory ~/.nodimus-memory/bin/nodimus-memory mcp"
+Write-Host "cursor mcp add nodimus-memory ~/.nodimus-memory/bin/nodimus-memory mcp"

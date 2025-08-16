@@ -4,11 +4,11 @@ bind = "127.0.0.1"
 timeout = 30
 
 [storage]
-data_dir = "~/.nodimus"
+data_dir = "~/.nodimus-memory"
 
 [logger]
 level = "info"
-file = "audit/nodimus.log"
+file = "audit/nodimus-memory.log"
 max_size = 50
 max_backups = 3
 max_age = 30
