@@ -1,3 +1,13 @@
+# This is an example .goreleaser.yml file.
+# Make sure to check the documentation at https://goreleaser.com
+version: 2
+
+project_name: nodimus-memory
+
+before:
+  hooks:
+    - go mod tidy
+
 builds:
   - id: nodimus-memory
     main: ./cmd/nodimus-memory
@@ -16,8 +26,6 @@ builds:
 
 archives:
   - id: nodimus-memory
-    builds:
-      - nodimus-memory
     format: tar.gz
     format_overrides:
       - goos: windows
@@ -48,7 +56,8 @@ dockers:
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
 
-signs:
-  - 
-    artifacts: all
-    args: ["--key", "env:COSIGN_PRIVATE_KEY", "--yes", "-a", "sha256"]
+# Signing is a GoReleaser Pro feature.
+# Commenting out for now as it requires a COSIGN_PRIVATE_KEY secret.
+# signs:
+#   - artifacts: all
+#     args: ["--key", "env:COSIGN_PRIVATE_KEY", "--yes", "-a", "sha256"]
