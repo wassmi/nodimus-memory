@@ -13,7 +13,7 @@ builds:
     main: cmd/nodimus-memory/main.go
     binary: nodimus-memory
     env:
-      - CGO_ENABLED=0
+      - CGO_ENABLED=0 # Default CGO to disabled
     goos:
       - linux
       - darwin
@@ -23,6 +23,10 @@ builds:
       - arm64
     ldflags:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+    overrides:
+      - goos: linux
+        env:
+          - CGO_ENABLED=1 # Enable CGO only for Linux builds
 
 archives:
   - id: nodimus-memory
