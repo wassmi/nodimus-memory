@@ -25,14 +25,16 @@ builds:
       - goos: linux
         goarch: amd64
         env:
-          - CGO_ENABLED=1 # Enable CGO for Linux amd64
+          - CGO_ENABLED=1
+          - CC=gcc # Explicitly use gcc for amd64
       - goos: linux
         goarch: arm64
         env:
-          - CGO_ENABLED=1 # Enable CGO for Linux arm64
+          - CGO_ENABLED=1
+          - CC=aarch64-linux-gnu-gcc # Use the cross-compiler for arm64
 
 archives:
-  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
         format: zip
