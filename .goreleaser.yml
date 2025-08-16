@@ -1,0 +1,54 @@
+builds:
+  - id: nodimus-memory
+    main: ./cmd/nodimus
+    binary: nodimus-memory
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+
+archives:
+  - id: nodimus-memory
+    builds:
+      - nodimus-memory
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+dockers:
+  - goos: linux
+    goarch: amd64
+    image_templates:
+      - "ghcr.io/nodimus/nodimus:latest"
+      - "ghcr.io/nodimus/nodimus:{{ .Tag }}"
+    build_flag_templates:
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+
+signs:
+  - 
+    artifacts: all
+    args: ["--key", "env:COSIGN_PRIVATE_KEY", "--yes", "-a", "sha256"]

@@ -1,0 +1,15 @@
+[server]
+port = 8080
+bind = "127.0.0.1"
+timeout = 30
+
+[storage]
+data_dir = "~/.nodimus"
+
+[logger]
+level = "info"
+file = "audit/nodimus.log"
+max_size = 50
+max_backups = 3
+max_age = 30
+compress = true
