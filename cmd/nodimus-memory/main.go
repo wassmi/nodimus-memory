@@ -187,7 +187,7 @@ func runStdioServer() {
 		os.Exit(1)
 	}
 	appLogger := logger.New(cfg.Logger)
-	db, dataDir, err := setupCommon(appLogger, cfg, &realDBProvider{})
+	db, _, err := setupCommon(appLogger, cfg, &realDBProvider{})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Setup failed: %v\n", err)
 		os.Exit(1)
