@@ -11,7 +11,7 @@ builds:
     main: cmd/nodimus-memory/main.go
     binary: nodimus-memory
     env:
-      - CGO_ENABLED=0
+      - CGO_ENABLED=1 # Enable CGO for all builds
     goos:
       - linux
       - darwin

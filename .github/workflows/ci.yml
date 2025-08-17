@@ -14,12 +14,24 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Grant permission to create a release
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Set up multi-architecture support
+        run: |
+          sudo dpkg --add-architecture arm64
+          sudo tee /etc/apt/sources.list.d/arm64.list <<'EOF'
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main restricted universe multiverse
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted universe multiverse
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-backports main restricted universe multiverse
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security main restricted universe multiverse
+          EOF
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu
 
       - name: Set up Go
         uses: actions/setup-go@v2
