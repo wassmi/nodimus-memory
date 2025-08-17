@@ -147,6 +147,12 @@ func setupCommon(log CommonLogger, cfg *config.Config, dbProvider DBProvider, fa
 	return db, dataDir, nil
 }
 
+type realDBProvider struct{}
+
+func (r *realDBProvider) NewDB(dataSourceName string) (*storage.DB, error) {
+	return storage.NewDB(dataSourceName)
+}
+
 func runHTTPServer() {
 	failsafeLog, f := createFailsafeLogger()
 	if f != nil {
