@@ -51,10 +51,13 @@ get_os_arch() {
       exit 1
       ;;
   esac
+  echo "${OS} ${ARCH}"
 }
 
 main() {
-  get_os_arch
+  OS_ARCH=$(get_os_arch)
+  OS=$(echo "$OS_ARCH" | cut -d' ' -f1)
+  ARCH=$(echo "$OS_ARCH" | cut -d' ' -f2)
 
   VERSION=$(get_latest_version)
   if [ -z "$VERSION" ]; then
@@ -65,7 +68,7 @@ main() {
   echo "Downloading Nodimus Memory ${VERSION} for ${OS} ${ARCH}..."
 
   # Construct the download URL
-  FILENAME="nodimus-memory_${OS}_${ARCH}.tar.gz"
+  FILENAME="nodimus-memory_${VERSION}_${OS}_${ARCH}.tar.gz"
   DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${VERSION}/${FILENAME}"
 
   # Create a temporary directory for the download
