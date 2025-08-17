@@ -2,17 +2,12 @@ package main
 
 import (
 	"bufio"
-	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
-	"os/signal"
 	"path/filepath"
-	"syscall"
 
 	"github.com/wassmi/nodimus-memory/internal/config"
 	"github.com/wassmi/nodimus-memory/internal/kg"
@@ -188,7 +183,7 @@ func runStdioServer() {
 	if f != nil {
 		defer f.Close()
 	}
-	failsafeLog.Println("---")
+	failsafeLog.Println("--- Stdio server starting ---")
 
 	cfg, err := ensureConfig(configFile, failsafeLog)
 	if err != nil {
@@ -211,9 +206,7 @@ func runStdioServer() {
 	}
 	defer db.Close()
 
-	mcpService := &server.MemoryService{DB: db, DataDir: dataDir, Log: appLogger}
 	reader := bufio.NewReader(os.Stdin)
-	writer := bufio.NewWriter(os.Stdout)
 
 	failsafeLog.Println("Entering main JSON-RPC read loop...")
 	for {
