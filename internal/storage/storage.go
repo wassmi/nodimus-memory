@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/blevesearch/bleve/v2"
@@ -26,18 +27,22 @@ func NewDB(dataSourceName string) (*DB, error) {
 		return nil, err
 	}
 	if err := db.Ping(); err != nil {
-		return nil, err	}
+		return nil, err
+	}
 
 	// Open or create a bleve index
-	mapping := bleve.NewIndexMapping()
+	indexPath := dataSourceName + ".bleve"
 	var index bleve.Index
-	if dataSourceName == ":memory:" {
-		index, err = bleve.NewMemOnly(mapping)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create in-memory bleve index: %w", err)
-	}
+	if _, err := os.Stat(indexPath); os.IsNotExist(err) {
+		// Index does not exist, create it
+		mapping := bleve.NewIndexMapping()
+		index, err = bleve.New(indexPath, mapping)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create bleve index: %w", err)
+		}
 	} else {
-		index, err = bleve.New(dataSourceName+".bleve", mapping)
+		// Index exists, open it
+		index, err = bleve.Open(indexPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open bleve index: %w", err)
 		}
@@ -61,16 +66,12 @@ func (db *DB) AddMemory(content string, entityNames []string) (int64, error) {
 
 	result, err := tx.Exec("INSERT INTO memories (content) VALUES (?)", content)
 	if err != nil {
-		if rbErr := tx.Rollback(); rbErr != nil {
-			return 0, fmt.Errorf("transaction rollback failed: %w, original error: %v", rbErr, err)
-		}
+		tx.Rollback()
 		return 0, err
 	}
 	memoryID, err := result.LastInsertId()
 	if err != nil {
-		if rbErr := tx.Rollback(); rbErr != nil {
-			return 0, fmt.Errorf("transaction rollback failed: %w, original error: %v", rbErr, err)
-		}
+		tx.Rollback()
 		return 0, err
 	}
 
@@ -78,39 +79,30 @@ func (db *DB) AddMemory(content string, entityNames []string) (int64, error) {
 		var entityID int64
 		err := tx.QueryRow("SELECT id FROM entities WHERE name = ?", entityName).Scan(&entityID)
 		if err == sql.ErrNoRows {
-			// Entity doesn't exist, so create it.
 			result, err := tx.Exec("INSERT INTO entities (name, type) VALUES (?, ?)", entityName, "unknown")
 			if err != nil {
-				if rbErr := tx.Rollback(); rbErr != nil {
-					return 0, fmt.Errorf("transaction rollback failed: %w, original error: %v", rbErr, err)
-				}
+				tx.Rollback()
 				return 0, err
 			}
 			entityID, err = result.LastInsertId()
 			if err != nil {
-				if rbErr := tx.Rollback(); rbErr != nil {
-					return 0, fmt.Errorf("transaction rollback failed: %w, original error: %v", rbErr, err)
-				}
+				tx.Rollback()
 				return 0, err
 			}
 		} else if err != nil {
-			if rbErr := tx.Rollback(); rbErr != nil {
-				return 0, fmt.Errorf("transaction rollback failed: %w, original error: %v", rbErr, err)
-			}
+			tx.Rollback()
 			return 0, err
 		}
 
 		_, err = tx.Exec("INSERT INTO memory_entities (memory_id, entity_id) VALUES (?, ?)", memoryID, entityID)
 		if err != nil {
-			if rbErr := tx.Rollback(); rbErr != nil {
-				return 0, fmt.Errorf("transaction rollback failed: %w, original error: %v", rbErr, err)
-			}
+			tx.Rollback()
 			return 0, err
 		}
 	}
 
-	// Index the memory content
 	if err := db.index.Index(strconv.FormatInt(memoryID, 10), content); err != nil {
+		tx.Rollback()
 		return 0, fmt.Errorf("failed to index memory: %w", err)
 	}
 
@@ -224,7 +216,6 @@ func (db *DB) GetSnapshot() (*sql.DB, error) {
 // RestoreSnapshot restores a snapshot of the database.
 func (db *DB) RestoreSnapshot(snapshot *sql.DB) error {
 	// This is a placeholder for a more complex snapshot restoration process.
-	// For now, we'll just copy the database file.
 	return nil
 }
 
@@ -239,7 +230,6 @@ func (db *DB) Close() error {
 	if err != nil {
 		return err
 	}
-	// Also close the bleve index
 	if db.index != nil {
 		if err := db.index.Close(); err != nil {
 			return fmt.Errorf("failed to close bleve index: %w", err)
