@@ -37,15 +37,3 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-
-dockers:
-  - goos: linux
-    goarch: amd64
-    image_templates:
-      - "ghcr.io/wassmi/nodimus-memory:latest"
-      - "ghcr.io/wassmi/nodimus-memory:{{ .Tag }}"
-    build_flag_templates:
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
