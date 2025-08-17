@@ -72,6 +72,8 @@ func ensureConfig(userConfigPath string) (*config.Config, error) {
 	}
 
 	if _, err := os.Stat(finalConfigPath); os.IsNotExist(err) {
+		// CRITICAL FIX: Print diagnostic messages to stderr, not stdout.
+		fmt.Fprintf(os.Stderr, "Creating default configuration file at %s\n", finalConfigPath)
 		defaultConfig := config.Default()
 		if err := defaultConfig.Save(finalConfigPath); err != nil {
 			return nil, fmt.Errorf("could not save default config file: %w", err)
@@ -179,9 +181,9 @@ type JSONRPCRequest struct {
 }
 
 type JSONRPCResponse struct {
-	JSONRPC string        `json:"jsonrpc"`
-	Result  interface{}   `json:"result,omitempty"`
-	Error   *JSONRPCError `json:"error,omitempty"`
+	JSONRPC string          `json:"jsonrpc"`
+	Result  interface{}     `json:"result,omitempty"`
+	Error   *JSONRPCError   `json:"error,omitempty"`
 	ID      *json.RawMessage `json:"id"`
 }
 
