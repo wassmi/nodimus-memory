@@ -72,6 +72,16 @@ func Default() *Config {
 	}
 }
 
+// Save saves the configuration to the given file path.
+func (c *Config) Save(path string) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return toml.NewEncoder(f).Encode(c)
+}
+
 // ExpandDataDir expands the tilde in the data directory path to the user's
 // home directory.
 func (c *Config) ExpandDataDir() (string, error) {
