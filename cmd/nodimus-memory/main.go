@@ -240,7 +240,22 @@ func runStdioServer() {
 		switch req.Method {
 		case "initialize":
 			resp.Result = map[string]interface{}{
-				"capabilities": map[string]interface{}{},
+				"protocolVersion": "2025-06-18",
+				"serverInfo": map[string]interface{}{
+					"name": "nodimus-memory",
+					"tools": []map[string]interface{}{
+						{
+							"name":        "memory.AddMemory",
+							"description": "Adds a new memory to the system.",
+							"parameters":  map[string]interface{}{},
+						},
+						{
+							"name":        "memory.SearchMemory",
+							"description": "Searches for memories based on a query.",
+							"parameters":  map[string]interface{}{},
+						},
+					},
+				},
 			}
 		case "shutdown":
 			return // Exit cleanly
