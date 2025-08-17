@@ -194,9 +194,6 @@ func runStdioServer() {
 	}
 	defer db.Close()
 
-	mcpService := &server.MemoryService{DB: db, DataDir: dataDir, Log: appLogger}
-	// This is where the stdio server logic will go.
-	// For now, we'll just print a message.
 	appLogger.Println("MCP stdio server started.")
 	// In a real implementation, you would read from stdin and write to stdout.
 	// This is a placeholder to fix the build.
