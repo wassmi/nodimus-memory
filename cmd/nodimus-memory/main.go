@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -41,8 +44,6 @@ var (
 )
 
 func init() {
-	// The --config flag is now the single source of truth for the config file path.
-	// If not provided, the app will use the default location.
 	rootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "path to config file (default is ~/.nodimus-memory/config.toml)")
 	rootCmd.AddCommand(mcpCmd)
 }
@@ -54,9 +55,6 @@ func main() {
 	}
 }
 
-// ensureConfig ensures that a configuration file exists. If the user provides a path,
-// it's used. Otherwise, it checks for the default path (~/.nodimus-memory/config.toml).
-// If no config file is found, it creates a default one at the default path.
 func ensureConfig(userConfigPath string) (*config.Config, error) {
 	var finalConfigPath string
 	if userConfigPath != "" {
@@ -73,16 +71,12 @@ func ensureConfig(userConfigPath string) (*config.Config, error) {
 		finalConfigPath = filepath.Join(configDir, "config.toml")
 	}
 
-	// If the config file doesn't exist at the final path, create it.
 	if _, err := os.Stat(finalConfigPath); os.IsNotExist(err) {
-		fmt.Printf("Creating default configuration file at %s\n", finalConfigPath)
 		defaultConfig := config.Default()
 		if err := defaultConfig.Save(finalConfigPath); err != nil {
 			return nil, fmt.Errorf("could not save default config file: %w", err)
 		}
 	}
-
-	// Now, load the configuration from the final path.
 	return config.Load(finalConfigPath)
 }
 
@@ -177,25 +171,110 @@ func runHTTPServer() {
 	appLogger.Println("Servers stopped.")
 }
 
-// ... (JSON-RPC types remain the same)
+type JSONRPCRequest struct {
+	JSONRPC string          `json:"jsonrpc"`
+	Method  string          `json:"method"`
+	Params  json.RawMessage `json:"params"`
+	ID      *json.RawMessage `json:"id"`
+}
+
+type JSONRPCResponse struct {
+	JSONRPC string        `json:"jsonrpc"`
+	Result  interface{}   `json:"result,omitempty"`
+	Error   *JSONRPCError `json:"error,omitempty"`
+	ID      *json.RawMessage `json:"id"`
+}
+
+type JSONRPCError struct {
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
+}
 
 func runStdioServer() {
 	cfg, err := ensureConfig(configFile)
 	if err != nil {
-		// In stdio mode, we can't easily prompt the user, so we log to stderr.
 		fmt.Fprintf(os.Stderr, "failed to load or create config: %v\n", err)
 		os.Exit(1)
 	}
 	appLogger := logger.New(cfg.Logger)
-	db, _, err := setupCommon(appLogger, cfg, &realDBProvider{})
+	db, dataDir, err := setupCommon(appLogger, cfg, &realDBProvider{})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Setup failed: %v\n", err)
 		os.Exit(1)
 	}
 	defer db.Close()
 
-	appLogger.Println("MCP stdio server started.")
-	// In a real implementation, you would read from stdin and write to stdout.
-	// This is a placeholder to fix the build.
-	<-make(chan struct{})
+	mcpService := &server.MemoryService{DB: db, DataDir: dataDir, Log: appLogger}
+	reader := bufio.NewReader(os.Stdin)
+	writer := bufio.NewWriter(os.Stdout)
+
+	for {
+		line, err := reader.ReadBytes('\n')
+		if err != nil {
+			if err != io.EOF {
+				appLogger.Printf("Error reading from stdin: %v\n", err)
+			}
+			return
+		}
+
+		var req JSONRPCRequest
+		if err := json.Unmarshal(line, &req); err != nil {
+			// Handle parse error
+			continue
+		}
+
+		var resp JSONRPCResponse
+		resp.JSONRPC = "2.0"
+		resp.ID = req.ID
+
+		switch req.Method {
+		case "memory.AddMemory":
+			var params server.AddMemoryRequest
+			if err := json.Unmarshal(req.Params, &params); err == nil {
+				var reply server.AddMemoryResponse
+				if err := mcpService.AddMemory(nil, &params, &reply); err == nil {
+					resp.Result = reply
+				} else {
+					resp.Error = &JSONRPCError{Code: -32000, Message: "Server error", Data: err.Error()}
+				}
+			} else {
+				resp.Error = &JSONRPCError{Code: -32602, Message: "Invalid params", Data: err.Error()}
+			}
+		case "memory.SearchMemory":
+			var params server.SearchMemoryRequest
+			if err := json.Unmarshal(req.Params, &params); err == nil {
+				var reply server.SearchMemoryResponse
+				if err := mcpService.SearchMemory(nil, &params, &reply); err == nil {
+					resp.Result = reply
+				} else {
+					resp.Error = &JSONRPCError{Code: -32000, Message: "Server error", Data: err.Error()}
+				}
+			} else {
+				resp.Error = &JSONRPCError{Code: -32602, Message: "Invalid params", Data: err.Error()}
+			}
+		case "memory.GetContext":
+			var params server.GetContextRequest
+			if err := json.Unmarshal(req.Params, &params); err == nil {
+				var reply server.GetContextResponse
+				if err := mcpService.GetContext(nil, &params, &reply); err == nil {
+					resp.Result = reply
+				} else {
+					resp.Error = &JSONRPCError{Code: -32000, Message: "Server error", Data: err.Error()}
+				}
+			} else {
+				resp.Error = &JSONRPCError{Code: -32602, Message: "Invalid params", Data: err.Error()}
+			}
+		default:
+			resp.Error = &JSONRPCError{Code: -32601, Message: "Method not found"}
+		}
+		writeResponse(writer, resp, appLogger)
+	}
+}
+
+func writeResponse(writer *bufio.Writer, resp JSONRPCResponse, log CommonLogger) {
+	respBytes, _ := json.Marshal(resp)
+	writer.Write(respBytes)
+	writer.WriteString("\n")
+	writer.Flush()
 }
