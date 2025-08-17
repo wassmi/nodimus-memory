@@ -33,8 +33,8 @@ main() {
 
   # Normalize OS and ARCH names to match GoReleaser's naming convention
   case "$OS" in
-    Linux) OS="Linux" ;;
-    Darwin) OS="Darwin" ;;
+    Linux) OS="linux" ;;
+    Darwin) OS="darwin" ;;
     *)
       echo "Unsupported OS: $OS"
       exit 1
