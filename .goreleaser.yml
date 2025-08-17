@@ -11,7 +11,7 @@ builds:
     main: cmd/nodimus-memory/main.go
     binary: nodimus-memory
     env:
-      - CGO_ENABLED=1 # Enable CGO for all builds
+      - CGO_ENABLED=0 # This is now safe and recommended
     goos:
       - linux
       - darwin

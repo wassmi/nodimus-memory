@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/blevesearch/bleve/v2"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 //go:embed schema.sql
@@ -21,7 +21,7 @@ type DB struct {
 
 // NewDB creates a new database connection.
 func NewDB(dataSourceName string) (*DB, error) {
-	db, err := sql.Open("sqlite3", dataSourceName)
+	db, err := sql.Open("sqlite", dataSourceName)
 	if err != nil {
 		return nil, err
 	}
