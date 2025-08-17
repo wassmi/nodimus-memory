@@ -17,7 +17,6 @@ import (
 	"github.com/wassmi/nodimus-memory/internal/config"
 	"github.com/wassmi/nodimus-memory/internal/kg"
 	"github.com/wassmi/nodimus-memory/internal/logger"
-	"github.com/wassmi/nodimus-memory/internal/seccomp"
 	"github.com/wassmi/nodimus-memory/internal/server"
 	"github.com/wassmi/nodimus-memory/internal/snapshot"
 	"github.com/wassmi/nodimus-memory/internal/storage"
@@ -71,9 +70,6 @@ type DBProvider interface {
 }
 
 func setupCommon(log CommonLogger, cfg ConfigProvider, dbProvider DBProvider) (*storage.DB, string, error) {
-	if err := seccomp.LoadProfile(); err != nil {
-		return nil, "", fmt.Errorf("failed to load seccomp profile: %w", err)
-	}
 	dataDir, err := cfg.ExpandDataDir()
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to expand data dir: %w", err)
