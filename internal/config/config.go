@@ -63,7 +63,7 @@ func Default() *Config {
 		},
 		Logger: LoggerConfig{
 			Level:      "info",
-			File:       "audit/nodimus-memory.log",
+			File:       "nodimus-memory.log",
 			MaxSize:    50, // megabytes
 			MaxBackups: 3,
 			MaxAge:     30, // days

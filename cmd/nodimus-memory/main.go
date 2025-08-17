@@ -72,7 +72,6 @@ func ensureConfig(userConfigPath string) (*config.Config, error) {
 	}
 
 	if _, err := os.Stat(finalConfigPath); os.IsNotExist(err) {
-		// CRITICAL FIX: Print diagnostic messages to stderr, not stdout.
 		fmt.Fprintf(os.Stderr, "Creating default configuration file at %s\n", finalConfigPath)
 		defaultConfig := config.Default()
 		if err := defaultConfig.Save(finalConfigPath); err != nil {
@@ -130,8 +129,12 @@ func runHTTPServer() {
 	if err != nil {
 		log.Fatalf("failed to load or create config: %v\n", err)
 	}
-	appLogger := logger.New(cfg.Logger)
-	db, dataDir, err := setupCommon(appLogger, cfg, &realDBProvider{})
+	dataDir, err := cfg.ExpandDataDir()
+	if err != nil {
+		log.Fatalf("failed to expand data dir: %v", err)
+	}
+	appLogger := logger.New(cfg.Logger, dataDir)
+	db, _, err := setupCommon(appLogger, cfg, &realDBProvider{})
 	if err != nil {
 		appLogger.Fatalf("Setup failed: %v", err)
 	}
@@ -199,8 +202,13 @@ func runStdioServer() {
 		fmt.Fprintf(os.Stderr, "failed to load or create config: %v\n", err)
 		os.Exit(1)
 	}
-	appLogger := logger.New(cfg.Logger)
-	db, dataDir, err := setupCommon(appLogger, cfg, &realDBProvider{})
+	dataDir, err := cfg.ExpandDataDir()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to expand data dir: %v\n", err)
+		os.Exit(1)
+	}
+	appLogger := logger.New(cfg.Logger, dataDir)
+	db, _, err := setupCommon(appLogger, cfg, &realDBProvider{})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Setup failed: %v\n", err)
 		os.Exit(1)
@@ -222,7 +230,6 @@ func runStdioServer() {
 
 		var req JSONRPCRequest
 		if err := json.Unmarshal(line, &req); err != nil {
-			// Handle parse error
 			continue
 		}
 
