@@ -117,11 +117,34 @@ func setupCommon(log CommonLogger, cfg *config.Config, dbProvider DBProvider, fa
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to expand data dir: %w", err)
 	}
-
-type realDBProvider struct{}
-
-func (r *realDBProvider) NewDB(dataSourceName string) (*storage.DB, error) {
-	return storage.NewDB(dataSourceName)
+	failsafeLog.Printf("Data directory expanded to: %s", dataDir)
+	if err := os.MkdirAll(dataDir, 0755); err != nil {
+		return nil, "", fmt.Errorf("failed to create data dir: %w", err)
+	}
+	dbPath := filepath.Join(dataDir, "nodimus-memory.db")
+	failsafeLog.Printf("Opening database at: %s", dbPath)
+	db, err := dbProvider.NewDB(dbPath)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to open database: %w", err)
+	}
+	if db == nil {
+		return nil, "", errors.New("database connection is nil")
+	}
+	failsafeLog.Println("Migrating database...")
+	if err := db.Migrate(); err != nil {
+		return nil, "", fmt.Errorf("failed to migrate database: %w", err)
+	}
+	failsafeLog.Println("Running integrity check...")
+	if err := snapshot.IntegrityCheck(db); err != nil {
+		return nil, "", fmt.Errorf("database integrity check failed: %w", err)
+	}
+	kgPath := filepath.Join(dataDir, "knowledge-graph.jsonld")
+	failsafeLog.Printf("Generating knowledge graph at: %s", kgPath)
+	if err := kg.Generate(db, kgPath); err != nil {
+		log.Printf("failed to generate knowledge graph: %v\n", err)
+	}
+	failsafeLog.Println("Common setup complete.")
+	return db, dataDir, nil
 }
 
 func runHTTPServer() {
