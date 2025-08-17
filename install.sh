@@ -2,7 +2,7 @@
 #
 # Nodimus Memory Installer
 #
-# This script downloads and installs the latest version of nodimus-memory.
+# This script downloads and installs nodimus-memory.
 #
 # Usage:
 #   curl -sSf https://raw.githubusercontent.com/wassmi/nodimus-memory/main/install.sh | sh
@@ -10,25 +10,13 @@
 
 set -e
 
-# Define the GitHub repository
+# Define the GitHub repository and the known good version
 REPO="wassmi/nodimus-memory"
-
-# Get the latest version from GitHub API
-get_latest_version() {
-  curl --silent "https://api.github.com/repos/${REPO}/releases/latest" |
-  grep '"tag_name":' |
-  sed -E 's/.*"([^"]+)".*/\1/'
-}
+VERSION="v1.5.2"
 
 main() {
   OS=$(uname -s | tr '[:upper:]' '[:lower:]')
   ARCH=$(uname -m)
-  VERSION=$(get_latest_version)
-
-  if [ -z "$VERSION" ]; then
-    echo "Could not determine the latest version. Aborting."
-    exit 1
-  fi
 
   # Normalize ARCH name to match GoReleaser's naming convention
   case "$ARCH" in
