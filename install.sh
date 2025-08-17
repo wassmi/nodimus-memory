@@ -41,7 +41,7 @@ get_os_arch() {
 
   case "$ARCH" in
     x86_64)
-      ARCH="x86_64"
+      ARCH="amd64"
       ;;
     arm64 | aarch64)
       ARCH="arm64"
