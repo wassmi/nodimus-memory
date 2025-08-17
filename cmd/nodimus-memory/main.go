@@ -131,7 +131,7 @@ func runHTTPServer() {
 	}
 	dataDir, err := cfg.ExpandDataDir()
 	if err != nil {
-		log.Fatalf("failed to expand data dir: %v", err)
+		log.Fatalf("failed to expand data dir: %v\n", err)
 	}
 	appLogger := logger.New(cfg.Logger, dataDir)
 	db, _, err := setupCommon(appLogger, cfg, &realDBProvider{})
@@ -184,9 +184,9 @@ type JSONRPCRequest struct {
 }
 
 type JSONRPCResponse struct {
-	JSONRPC string        `json:"jsonrpc"`
-	Result  interface{}   `json:"result,omitempty"`
-	Error   *JSONRPCError `json:"error,omitempty"`
+	JSONRPC string          `json:"jsonrpc"`
+	Result  interface{}     `json:"result,omitempty"`
+	Error   *JSONRPCError   `json:"error,omitempty"`
 	ID      *json.RawMessage `json:"id"`
 }
 
@@ -238,6 +238,12 @@ func runStdioServer() {
 		resp.ID = req.ID
 
 		switch req.Method {
+		case "initialize":
+			resp.Result = map[string]interface{}{
+				"capabilities": map[string]interface{}{},
+			}
+		case "shutdown":
+			return // Exit cleanly
 		case "memory.AddMemory":
 			var params server.AddMemoryRequest
 			if err := json.Unmarshal(req.Params, &params); err == nil {
