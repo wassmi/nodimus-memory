@@ -2,7 +2,7 @@
 #
 # Nodimus Memory Installer
 #
-# This script downloads and installs nodimus-memory.
+# This script downloads and installs the latest version of nodimus-memory.
 #
 # Usage:
 #   curl -sSf https://raw.githubusercontent.com/wassmi/nodimus-memory/main/install.sh | sh
@@ -10,13 +10,26 @@
 
 set -e
 
-# Define the GitHub repository and the known good version
+# Define the GitHub repository
 REPO="wassmi/nodimus-memory"
-VERSION="v1.5.2"
+
+# Get the latest version from GitHub API
+get_latest_version() {
+  curl --silent "https://api.github.com/repos/${REPO}/releases/latest" |
+  grep '"tag_name":' |
+  sed -E 's/.*"([^"]+)".*/\1/'
+}
 
 main() {
   OS=$(uname -s | tr '[:upper:]' '[:lower:]')
   ARCH=$(uname -m)
+  VERSION_TAG=$(get_latest_version)
+  VERSION=$(echo "$VERSION_TAG" | sed 's/^v//') # Remove 'v' prefix
+
+  if [ -z "$VERSION" ]; then
+    echo "Could not determine the latest version. Aborting."
+    exit 1
+  fi
 
   # Normalize ARCH name to match GoReleaser's naming convention
   case "$ARCH" in
@@ -24,11 +37,11 @@ main() {
     arm64 | aarch64) ARCH="arm64" ;;
   esac
 
-  echo "Downloading Nodimus Memory ${VERSION} for ${OS} ${ARCH}..."
+  echo "Downloading Nodimus Memory ${VERSION_TAG} for ${OS} ${ARCH}..."
 
   # Construct the correct download URL
   FILENAME="nodimus-memory_${VERSION}_${OS}_${ARCH}.tar.gz"
-  DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${VERSION}/${FILENAME}"
+  DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${VERSION_TAG}/${FILENAME}"
 
   # Create a temporary directory for the download
   TMP_DIR=$(mktemp -d)
