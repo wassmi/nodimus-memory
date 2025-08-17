@@ -2,7 +2,8 @@
 #
 # Nodimus Memory Installer
 #
-# This script downloads and installs nodimus-memory v1.5.2.
+# This script downloads and installs the latest version of nodimus-memory.
+# It tries to determine the OS and architecture and downloads the appropriate binary.
 #
 # Usage:
 #   curl -sSf https://raw.githubusercontent.com/wassmi/nodimus-memory/main/install.sh | sh
@@ -10,24 +11,36 @@
 
 set -e
 
-# Define the GitHub repository and version
+# Define the GitHub repository
 REPO="wassmi/nodimus-memory"
-VERSION="v1.5.2"
+
+# Get the latest version from GitHub API
+get_latest_version() {
+  curl --silent "https://api.github.com/repos/${REPO}/releases/latest" |
+  grep "tag_name": |
+  sed -E 's/.*"([^"]+)".*/\1/'
+}
 
 main() {
   OS=$(uname -s | tr '[:upper:]' '[:lower:]')
   ARCH=$(uname -m)
+  VERSION=$(get_latest_version)
+
+  if [ -z "$VERSION" ]; then
+    echo "Could not determine the latest version. Aborting."
+    exit 1
+  fi
 
   # Normalize ARCH name to match GoReleaser's naming convention
   case "$ARCH" in
-    x86_64) ARCH="amd64" ;;
-    arm64 | aarch64) ARCH="arm64" ;;
+    x86_64) ARCH="amd64" ;; 
+    arm64 | aarch64) ARCH="arm64" ;; 
   esac
 
   echo "Downloading Nodimus Memory ${VERSION} for ${OS} ${ARCH}..."
 
   # Construct the correct download URL
-  FILENAME="nodimus-memory_1.5.2_${OS}_${ARCH}.tar.gz"
+  FILENAME="nodimus-memory_${VERSION}_${OS}_${ARCH}.tar.gz"
   DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${VERSION}/${FILENAME}"
 
   # Create a temporary directory for the download
@@ -50,8 +63,21 @@ main() {
 
   chmod +x "${INSTALL_DIR}/nodimus-memory"
 
+  # Create the MCP configuration file
+  echo "Creating MCP configuration file..."
+  MCP_DIR="$HOME/.nodimus-memory"
+  mkdir -p "$MCP_DIR"
+  printf '{
+  "command": "%s/nodimus-memory",
+  "args": ["mcp"]
+}
+' "$INSTALL_DIR" > "$MCP_DIR/mcp.json"
+
+  echo ""
   echo "Nodimus Memory installed successfully!"
-  echo "Run 'nodimus-memory --help' to get started."
+  echo ""
+  echo "To complete the setup, run the following command to connect it to the Gemini CLI:"
+  echo "gemini mcp add nodimus-memory $MCP_DIR/mcp.json"
 }
 
 main
