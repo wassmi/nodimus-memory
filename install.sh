@@ -22,7 +22,7 @@ get_latest_version() {
 }
 
 main() {
-  OS=$(uname -s)
+  OS=$(uname -s | tr '[:upper:]' '[:lower:]')
   ARCH=$(uname -m)
   VERSION=$(get_latest_version)
 
@@ -31,23 +31,10 @@ main() {
     exit 1
   fi
 
-  # Normalize OS and ARCH names to match GoReleaser's naming convention
-  case "$OS" in
-    Linux) OS="linux" ;;
-    Darwin) OS="darwin" ;;
-    *)
-      echo "Unsupported OS: $OS"
-      exit 1
-      ;;
-  esac
-
+  # Normalize ARCH name to match GoReleaser's naming convention
   case "$ARCH" in
     x86_64) ARCH="amd64" ;;
     arm64 | aarch64) ARCH="arm64" ;;
-    *)
-      echo "Unsupported architecture: $ARCH"
-      exit 1
-      ;;
   esac
 
   echo "Downloading Nodimus Memory ${VERSION} for ${OS} ${ARCH}..."
