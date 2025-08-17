@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install multi-architecture Linux dependencies
+      - name: Set up multi-architecture support
         run: |
           sudo dpkg --add-architecture arm64
           sudo apt-get update
