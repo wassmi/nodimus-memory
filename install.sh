@@ -21,18 +21,20 @@ get_latest_version() {
   sed -E 's/.*"([^"]+)".*/\1/'
 }
 
-# Determine the operating system and architecture
-get_os_arch() {
-  OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+main() {
+  OS=$(uname -s)
   ARCH=$(uname -m)
+  VERSION=$(get_latest_version)
 
+  if [ -z "$VERSION" ]; then
+    echo "Could not determine the latest version. Aborting."
+    exit 1
+  fi
+
+  # Normalize OS and ARCH names to match GoReleaser's naming convention
   case "$OS" in
-    linux)
-      OS="Linux"
-      ;;
-    darwin)
-      OS="Darwin"
-      ;;
+    Linux) OS="Linux" ;;
+    Darwin) OS="Darwin" ;;
     *)
       echo "Unsupported OS: $OS"
       exit 1
@@ -40,34 +42,17 @@ get_os_arch() {
   esac
 
   case "$ARCH" in
-    x86_64)
-      ARCH="amd64"
-      ;;
-    arm64 | aarch64)
-      ARCH="arm64"
-      ;;
+    x86_64) ARCH="amd64" ;;
+    arm64 | aarch64) ARCH="arm64" ;;
     *)
       echo "Unsupported architecture: $ARCH"
       exit 1
       ;;
   esac
-  echo "${OS} ${ARCH}"
-}
-
-main() {
-  OS_ARCH=$(get_os_arch)
-  OS=$(echo "$OS_ARCH" | cut -d' ' -f1)
-  ARCH=$(echo "$OS_ARCH" | cut -d' ' -f2)
-
-  VERSION=$(get_latest_version)
-  if [ -z "$VERSION" ]; then
-    echo "Could not determine the latest version. Aborting."
-    exit 1
-  fi
 
   echo "Downloading Nodimus Memory ${VERSION} for ${OS} ${ARCH}..."
 
-  # Construct the download URL
+  # Construct the correct download URL
   FILENAME="nodimus-memory_${VERSION}_${OS}_${ARCH}.tar.gz"
   DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${VERSION}/${FILENAME}"
 
