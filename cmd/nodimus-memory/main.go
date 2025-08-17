@@ -12,7 +12,6 @@ import (
 	"github.com/wassmi/nodimus-memory/internal/config"
 	"github.com/wassmi/nodimus-memory/internal/kg"
 	"github.com/wassmi/nodimus-memory/internal/logger"
-	"github.com/wassmi/nodimus-memory/internal/server"
 	"github.com/wassmi/nodimus-memory/internal/snapshot"
 	"github.com/wassmi/nodimus-memory/internal/storage"
 	"github.com/spf13/cobra"
