@@ -398,6 +398,31 @@ def claude_search_memory(query):
 
 For production deployments, consider containerization using Docker. A `Dockerfile` will be provided in future releases to simplify deployment to various environments.
 
+## Troubleshooting
+
+### `ReferenceError: File is not defined` when adding to Gemini CLI
+
+If you see an error similar to this when running `gemini mcp add`:
+
+```
+ReferenceError: File is not defined
+    at Object.<anonymous> (.../undici/lib/web/webidl/index.js:512:48)
+```
+
+This is an issue with the version of Node.js or the Gemini CLI you are using. You can fix it by upgrading to the latest stable versions:
+
+```bash
+# Install the latest stable Node.js (e.g., 20)
+nvm install 20
+nvm use 20
+
+# Update the Gemini CLI
+npm install -g @google/gemini-cli
+
+# Try the command again
+gemini mcp add nodimus-memory ~/.nodimus-memory/mcp.json
+```
+
 ## Development
 
 If you wish to contribute or build from source:
