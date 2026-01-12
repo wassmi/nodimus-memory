@@ -1,0 +1,11 @@
+lancedb
+kuzu
+mcp
+watchdog
+cryptography
+numpy
+typer
+pydantic
+python-dotenv
+openai
+aiofiles
